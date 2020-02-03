@@ -273,7 +273,9 @@ void CDA<data_type>::CountingSort(int max_size) {
     new_data2 = new data_type[capacity];
 
     int Count_Array[max_size + 1];
-    memset(Count_Array, 0, sizeof(Count_Array));
+    for(int i = 0;i<max_size + 1;i++){
+        Count_Array[i] = 0;
+    }
     for(int i = 0;i<size;i++){
         Count_Array[(*this)[i]]++;
     }
@@ -439,60 +441,3 @@ void CDA<data_type>::insertionsort(int left, int right) {
     }
     ordered = true;
 }
-
-int main() 
-{
-    CDA <int> objt;
-// A => "10 0 1 2 3 4 5 6 7 8 9" Search => 6
-    for(int i = 0;i<1;i++){
-        objt.AddEnd(10);
-        objt.AddEnd(0);
-        objt.AddEnd(1);
-        objt.AddEnd(2);
-        objt.AddEnd(3);
-        objt.AddEnd(4);
-        objt.AddEnd(5);
-        objt.AddEnd(6);
-        objt.AddEnd(7);
-        objt.AddEnd(8);
-        objt.AddEnd(9);
-
-    }
-
-    CDA <int> objt2;
-    int twow;
-    cout<<&twow<<endl;
-    int onew = twow;
-    cout<<&onew<<endl;
-
-
-    //TODO: == EQUAL OPERATOR
-    if(onew == twow){
-        cout<<"here"<<endl;
-    }
-
-    objt2 = objt;
-
-    //TODO: == EQUAL OPERATOR
-    if(objt == objt2){
-        cout<<"here"<<endl;
-    }
-	for (int i=0; i< objt.Length();i++) cout << objt[i] << " ";  cout << endl;
-
-    cout<<objt.Select(9)<<endl;
-    cout<<objt.SetOrdered()<<endl;
-	for (int i=0; i< objt.Length();i++) cout << objt[i] << " ";  cout << endl;
-    objt.InsertionSort();
-	for (int i=0; i< objt.Length();i++) cout << objt[i] << " ";  cout << endl;
-
-    cout<<objt.SetOrdered()<<endl;
-
-
-
-
-    objt.Clear();
-    return 0;
-}
-
-
-
