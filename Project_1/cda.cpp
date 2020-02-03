@@ -1,5 +1,4 @@
 #include<iostream>
-#include <string>
 
 #define MIN_CAPACITY 1
 #define MULTIPLIER 2
@@ -61,39 +60,28 @@ class CDA
 // default constructor
 template <class data_type>
 CDA<data_type>::CDA() {
-    cout<<"Constructor, allocating."<<endl;
     capacity = MIN_CAPACITY;
     size = 0;
     front_index = 0;
     index_offset = 1;
     ordered = false;
     data = new data_type[capacity];
-
-    //for testing purposes, fill all elements with 0
-    for(int i = 0;i<capacity;i++){
-        data[i] = 0;
-    }
 }
+
 // constructor
 template <class data_type>
 CDA<data_type>::CDA(int cap) {
-    cout<<"Constructor, allocating."<<endl;
     capacity = cap;
     size = cap;
     front_index = 0;
     index_offset = 1;
     ordered = false;
     data = new data_type[capacity];
-
-    //for testing purposes, fill all elements with 0
-    for(int i = 0;i<capacity;i++){
-        data[i] = 0;
-    }
 }
+
 // copy constructor
 template <class data_type>
 CDA<data_type>::CDA(const CDA &a2) {
-    cout<<"Copy Constructor, Copying."<<endl;
     ordered = a2.ordered;
     size = a2.size;
     capacity = a2.capacity;
@@ -105,17 +93,16 @@ CDA<data_type>::CDA(const CDA &a2) {
         data[i] = a2.data[i];
     }
 }
+
 // destructor
 template <class data_type>
 CDA<data_type>::~CDA() {
-    cout<<"Destructor, unallocating"<<endl;
     delete [] data;
 }
 
 // *******member functions*******
 template <class data_type>
 void CDA<data_type>::AddEnd(data_type value) {
-    cout<<"Adding value to end"<<endl;
     //check if data is already full
     if(size >= capacity) {
         resize(1);
@@ -123,12 +110,10 @@ void CDA<data_type>::AddEnd(data_type value) {
     data[size-index_offset+1] = value;
     size++;
     SetOrdered();
-    // display_array();     
 }
 
 template <class data_type>
 void CDA<data_type>::AddFront(data_type value) { 
-    cout<<"Adding value to front"<<endl;
     if(size >= capacity) {
         resize(1);
     }
@@ -138,7 +123,6 @@ void CDA<data_type>::AddFront(data_type value) {
 
     index_offset++;
     SetOrdered();
-    display_array();      
 }
 
 template <class data_type>
@@ -152,6 +136,9 @@ data_type& CDA<data_type>::operator[](int value) {
 
 template <class data_type>
 void CDA<data_type>::operator=(const CDA &a2) {
+    //performs a deep copy of the class object
+    if(this == &a2)
+        return;
     ordered = a2.ordered;
     size = a2.size;
     capacity = a2.capacity;
@@ -167,15 +154,27 @@ void CDA<data_type>::operator=(const CDA &a2) {
 
 template <class data_type>
 bool CDA<data_type>::operator==(const CDA &a2) {
-    return false;
+    cout<<this<<endl;
+    cout<<&a2<<endl;
+    //checks if the address is the same, only works for objt == objt
+    if(this == &a2)
+        return true;
+    //check all values related to the class now
+    if(ordered != a2.ordered)
+        return false;
+    if(size != a2.size)
+        return false;
+    if(front_index !=a2.front_index)
+        return false;
+    if(index_offset!=a2.index_offset)
+        return false;
+    return true;
 }
 
 template <class data_type>
 void CDA<data_type>::DelEnd() {    
-    cout<<"Deleting value from end"<<endl;
     data[size - index_offset] = 0;
     size--;
-    display_array();
 
     if(size == capacity/4){
         resize(0);
@@ -185,12 +184,11 @@ void CDA<data_type>::DelEnd() {
 
 template <class data_type>
 void CDA<data_type>::DelFront() {
-    cout<<"Deleting value from front"<<endl;
     data[front_index] = 0;
     front_index  = (front_index + 1) % capacity;
-    index_offset --;
+    if(index_offset != 1) 
+        index_offset --;
     size --;
-    display_array();
 
     if(size == capacity/4){
         resize(0);
@@ -201,19 +199,16 @@ void CDA<data_type>::DelFront() {
 
 template <class data_type>
 int CDA<data_type>::Length() {
-    cout<<"Displaying length "<<front_index <<endl;
     return size;
 }
 
 template <class data_type>
 int CDA<data_type>::Capacity() {
-    cout<<"Displaying capacity"<<endl;
     return capacity;
 }
 
 template <class data_type>
 void CDA<data_type>::Clear() {
-    cout<<"erasing data"<<endl;
     ordered = false;
     size = 0;
     capacity = 1;
@@ -221,20 +216,17 @@ void CDA<data_type>::Clear() {
     index_offset = 1;
     delete [] data;
     data = new data_type[capacity];
-
 }
 
 template <class data_type>
 bool CDA<data_type>::Ordered() {
-    cout<<"displaying ordered status"<<endl;
     return ordered;
 }
 
 template <class data_type>
 int CDA<data_type>::SetOrdered() {
-    cout<<"checking if data is ordered"<<endl;
     ordered = true;
-    for(int i = 0; i< capacity - 1 && ordered == true; i++){
+    for(int i = 0; i< size - 1; i++){
         if((*this)[i]>(*this)[i+1]){
             ordered = false;
             return -1;
@@ -245,61 +237,64 @@ int CDA<data_type>::SetOrdered() {
 
 template <class data_type>
 data_type CDA<data_type>::Select(int choice) { 
-    cout<<"returning "<<choice<< " smallest element in data"<<endl;
-    display_array();
     if(ordered == true){
-        return data[choice - 1];
+        return (*this)[choice - 1];
     }
     else{
-        cout<<"returning random element using quikselect"<<endl;
-        return quickselect(0, capacity - 1, choice-1);
+        //quickselect is going to mess up the order, so make a 'backup' before
+        data_type *new_data;
+        new_data = new data_type[capacity];      
+        for (int i = 0; i<capacity;i++){
+            new_data[i] = data[i];
+        }
+        data_type answer = quickselect(0, size - 1, choice - 1);
+        data = new_data;
+        return answer;
     }
 }
 
 template <class data_type>
 void CDA<data_type>::InsertionSort() { 
-    insertionsort(0, capacity);
+    insertionsort(0, size);
 }
 
 template <class data_type>
 void CDA<data_type>::QuickSort() { 
-    cout<<"sorting data using Quick Sort"<<endl;
-    quicksort(0, capacity-1);
-    display_array();
+    quicksort(0, size-1);
+    ordered = true;
+    index_offset = 1;
+    front_index = 0;
 }
 
 template <class data_type>
 void CDA<data_type>::CountingSort(int max_size) { 
-    cout<<"sorting data using CountingSort"<<endl;
     data_type *new_data2;
 
     new_data2 = new data_type[capacity];
 
     int Count_Array[max_size + 1];
     memset(Count_Array, 0, sizeof(Count_Array));
-    for(int i = 0;i<capacity;i++){
+    for(int i = 0;i<size;i++){
         Count_Array[(*this)[i]]++;
     }
     for(int i = 1;i<max_size + 1;i++){
         Count_Array[i] = Count_Array[i] + Count_Array[i-1];
     }
-    for(int i = 0;i<capacity;i++){
-        new_data2[Count_Array[(*this)[i]]-1] = data[i];
-        --Count_Array[data[i]];
+    for(int i = 0;i<size;i++){
+        new_data2[Count_Array[(*this)[i]]-1] = (*this)[i];
+        --Count_Array[(*this)[i]];
     }
     ordered = true;
     index_offset = 1;
     front_index = 0;
     data = new_data2;
-    display_array();
 }
 
 template <class data_type>
-int CDA<data_type>::Search(data_type value) { 
+int CDA<data_type>::Search(data_type value) {
     if(ordered == true){
-        cout<<"searching using binary search"<<endl;
         int first = 0;
-        int last = capacity - 1;
+        int last = size;
         while(first <= last){
             int middle_element = first + (last - first)/2;
             if(value == (*this)[middle_element]){
@@ -314,7 +309,6 @@ int CDA<data_type>::Search(data_type value) {
         }
     }
     else{
-        cout<<"searching linearly for: "<< value<<endl;
         for(int i = 0; i< capacity;i++){
             if((*this)[i] == value){
                 return i;
@@ -334,13 +328,10 @@ void CDA<data_type>::resize(int mode) {
         for (int i = 0; i<new_capacity;i++){
             new_data[i] = (*this)[i];
         }
-
         capacity = new_capacity;
         data = new_data;
         front_index = 0;
         index_offset = 1;
-        // display_array();
-
     }
     if (mode == 1){
         data_type *new_data;
@@ -355,15 +346,13 @@ void CDA<data_type>::resize(int mode) {
         data = new_data;
         front_index = 0;
         index_offset = 1;
-        // display_array();
     }
 }
 
 template <class data_type>
 void CDA<data_type>::display_array() { 
-    cout<<"front_index:"<<front_index<<" index offset:"<<index_offset<<" size:"<<size<<" capacity:"<<capacity<<endl;
     for(int i = 0;i<capacity;i++){
-        cout<<(*this)[i]<<" ";
+        cout<<i<<data[i]<<" ";
     }
     cout<<endl;
 }
@@ -386,17 +375,12 @@ data_type CDA<data_type>::quickselect(int left, int right, int k) {
 
 template <class data_type>
 void CDA<data_type>::quicksort(int left, int right) {
-    // if((right - left) < INSERTION_THRESHOLD){
-    //     insertionsort(left, right + 1);
-    // }
-    // else{
     if(left < right){
         median(left,right);
         int part = partition(left, right, right);
         quicksort(left, part - 1);
         quicksort(part + 1, right);
     }
-    // }
     return;
 }
 
@@ -424,9 +408,9 @@ void CDA<data_type>::median(int left, int right) {
         swap(left, mid);
     if(data[right] < data[mid])
         swap(mid, right);
+    //so now we know the middle value is in the middle
+    //now move the middle value to the end and do a normal quick sort
     swap(mid, right);
-    //so now we know the middle value is in the middle, now move the middle value to the end and do a normal quick sort
-
 }
 
 template <class data_type>
@@ -437,57 +421,70 @@ void CDA<data_type>::swap(int left, int right) {
     tmp = data[left];
     data[left] = data[right];
     data[right] = tmp;
-
 }
 
 template <class data_type>
 void CDA<data_type>::insertionsort(int left, int right) {
-    cout<<"sorting data using Insertion Sort"<<endl;
     int left_index = left;
-    int key = 0;
-
+    data_type key;
     for(int i = left_index + 1; i < right; i++ ){
-        key = data[i];
+        key = (*this)[i];
         left_index = i - 1;
-        while(left_index >= 0 && data[left_index] > key)
+        while(left_index >= 0 && (*this)[left_index] > key)
         {
-            data[left_index + 1] = data[left_index];
+            (*this)[left_index + 1] = (*this)[left_index];
             left_index = left_index - 1;
         }
-        data[left_index + 1] = key;
+        (*this)[left_index + 1] = key;
     }
     ordered = true;
-    index_offset = 1;
-    front_index = 0;
-
 }
 
 int main() 
 {
     CDA <int> objt;
-
+// A => "10 0 1 2 3 4 5 6 7 8 9" Search => 6
     for(int i = 0;i<1;i++){
-        objt.AddEnd(1);
-        objt.AddEnd(11);
-        objt.AddEnd(3);
-        objt.AddEnd(8);
-        objt.AddEnd(2);
-        objt.AddEnd(9);
         objt.AddEnd(10);
-        objt.AddEnd(15);
+        objt.AddEnd(0);
+        objt.AddEnd(1);
+        objt.AddEnd(2);
+        objt.AddEnd(3);
+        objt.AddEnd(4);
+        objt.AddEnd(5);
+        objt.AddEnd(6);
+        objt.AddEnd(7);
+        objt.AddEnd(8);
+        objt.AddEnd(9);
+
     }
 
     CDA <int> objt2;
+    int twow;
+    cout<<&twow<<endl;
+    int onew = twow;
+    cout<<&onew<<endl;
+
+
+    //TODO: == EQUAL OPERATOR
+    if(onew == twow){
+        cout<<"here"<<endl;
+    }
 
     objt2 = objt;
 
     //TODO: == EQUAL OPERATOR
-    if(objt2 == objt){
+    if(objt == objt2){
         cout<<"here"<<endl;
     }
-    cout<<objt.Select(1);
+	for (int i=0; i< objt.Length();i++) cout << objt[i] << " ";  cout << endl;
+
+    cout<<objt.Select(9)<<endl;
     cout<<objt.SetOrdered()<<endl;
-    objt.QuickSort();
+	for (int i=0; i< objt.Length();i++) cout << objt[i] << " ";  cout << endl;
+    objt.InsertionSort();
+	for (int i=0; i< objt.Length();i++) cout << objt[i] << " ";  cout << endl;
+
     cout<<objt.SetOrdered()<<endl;
 
 
