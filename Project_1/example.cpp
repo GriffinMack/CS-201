@@ -30,6 +30,8 @@ int main(){
 	for (int i=0; i< C.Length();i++) cout << C[i] << " ";  cout << endl;
 	// C => "1 2 3 4 5 6 7 8 100 101"
 	C.DelEnd(); C.DelEnd();
+	for (int i=0; i< C.Length();i++) cout << C[i] << " ";  cout << endl;
+	// C => "1 2 3 4 5 6 7 8"	
 	C.AddFront(-100.0); C.AddFront(-200.0);
 	for (int i=0; i< C.Length();i++) cout << C[i] << " ";  cout << endl;
 	// C => "-200 -100 1 2 3 4 5 6 7 8"
@@ -44,8 +46,9 @@ int main(){
 	cout << "Select is " << A.Select(3) << endl;
 	// A => "0 1 2 3 4 5 6 7 8 9" Select => 2
 	cout << "Search is " << A.Search(5) << endl;
-	// A => "0 1 2 3 4 5 6 7 8 9" Search => 6
+	// A => "0 1 2 3 4 5 6 7 8 9" Search => 5
 	A.AddFront(10); 
+	for (int i=0; i< A.Length();i++) cout << A[i] << " ";  cout << endl;
 	// A => "10 0 1 2 3 4 5 6 7 8 9"
 	cout << "SetOrdered is " << A.SetOrdered() << endl;
 	// A => "10 0 1 2 3 4 5 6 7 8 9" SetOrdered => -1

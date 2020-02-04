@@ -1,8 +1,8 @@
-#include<iostream>
+#include<cstdlib>
 
-#define MIN_CAPACITY 1
-#define MULTIPLIER 2
-#define INSERTION_THRESHOLD 1
+#define MIN_CAPACITY 1 //array will never go below this capacity
+#define MULTIPLIER 2 //capacity of array is doubled when 100%, halved when 25% used
+#define INSERTION_THRESHOLD 68 //quicksort insertion-sort threshold
 
 using namespace std;
  
@@ -77,6 +77,9 @@ CDA<data_type>::CDA(int cap) {
     index_offset = 1;
     ordered = false;
     data = new data_type[capacity];
+    for(int i = 0;i<capacity;i++){
+        data[i] = 0;
+    }
 }
 
 // copy constructor
@@ -107,7 +110,8 @@ void CDA<data_type>::AddEnd(data_type value) {
     if(size >= capacity) {
         resize(1);
     }
-    data[size-index_offset+1] = value;
+    //     8        0       1
+    data[(size-index_offset+1)%capacity] = value;
     size++;
     SetOrdered();
 }
@@ -118,7 +122,7 @@ void CDA<data_type>::AddFront(data_type value) {
         resize(1);
     }
     front_index = capacity - index_offset;
-    data[front_index] = value;
+    data[front_index % capacity] = value;
     size++;
 
     index_offset++;
@@ -154,8 +158,6 @@ void CDA<data_type>::operator=(const CDA &a2) {
 
 template <class data_type>
 bool CDA<data_type>::operator==(const CDA &a2) {
-    cout<<this<<endl;
-    cout<<&a2<<endl;
     //checks if the address is the same, only works for objt == objt
     if(this == &a2)
         return true;
@@ -172,8 +174,10 @@ bool CDA<data_type>::operator==(const CDA &a2) {
 }
 
 template <class data_type>
-void CDA<data_type>::DelEnd() {    
-    data[size - index_offset] = 0;
+void CDA<data_type>::DelEnd() {
+    if(size == 0)
+        return;
+    data[(size - index_offset) % capacity] = 0;
     size--;
 
     if(size == capacity/4){
@@ -184,16 +188,16 @@ void CDA<data_type>::DelEnd() {
 
 template <class data_type>
 void CDA<data_type>::DelFront() {
+    if(size == 0)
+        return;
     data[front_index] = 0;
     front_index  = (front_index + 1) % capacity;
-    if(index_offset != 1) 
-        index_offset --;
+    index_offset --;
     size --;
 
     if(size == capacity/4){
         resize(0);
     }
-
     return;
 }
 
@@ -247,7 +251,7 @@ data_type CDA<data_type>::Select(int choice) {
         for (int i = 0; i<capacity;i++){
             new_data[i] = data[i];
         }
-        data_type answer = quickselect(0, size - 1, choice - 1);
+        data_type answer = quickselect(0, size - 1, choice);
         data = new_data;
         return answer;
     }
@@ -352,9 +356,11 @@ void CDA<data_type>::resize(int mode) {
 }
 
 template <class data_type>
-void CDA<data_type>::display_array() { 
+void CDA<data_type>::display_array() {
+    // method used for testing, displays current "back end" array
+    cout<<"offset: "<<index_offset<<" size: "<<size<<" capacity: "<<capacity<<" current data array: ";
     for(int i = 0;i<capacity;i++){
-        cout<<i<<data[i]<<" ";
+        cout<<" "<<data[i]<<" ";
     }
     cout<<endl;
 }
