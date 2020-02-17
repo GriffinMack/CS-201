@@ -1,6 +1,6 @@
 #include <iostream>
 using namespace std;
-#include "cda.cpp"
+#include "CDA.cpp"
 
 int main(){
 	CDA<int> A;
