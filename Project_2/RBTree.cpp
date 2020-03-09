@@ -23,8 +23,8 @@ public:
     */
         //pointers to other nodes
         Node *parent;
-        Node *leftChild;
-        Node *rightChild;
+        Node *left;
+        Node *right;
 
         //data about the node(value and key represent two seperate data entries ex. CWID and Name)
         bool color;
@@ -36,8 +36,8 @@ public:
         Node()
         {
             parent = NULL;
-            leftChild = NULL;
-            rightChild = NULL;
+            left = NULL;
+            right = NULL;
 
             color = RED;
             size = 1;
@@ -55,30 +55,29 @@ public:
     void _rightRotate(Node *node);
     void _transplant(Node *root, Node *root_child);
     void _removeFixup(Node *);
-    void _displayTree(Node *node);
     void _preorderWalk(Node *node);
     void _inorderWalk(Node *node);
     void _postorderWalk(Node *node);
     Node *_select(Node *node, int pos)
     {
-        int rank = node->leftChild->size + 1;
+        int rank = node->left->size + 1;
         if (rank == pos)
             return node;
         else if (pos < rank)
-            return _select(node->leftChild, pos);
+            return _select(node->left, pos);
         else
-            return _select(node->rightChild, pos - rank);
+            return _select(node->right, pos - rank);
     }
     Node *_minimum(Node *current_node)
     {
-        while (current_node->leftChild != nil)
-            current_node = current_node->leftChild;
+        while (current_node->left != nil)
+            current_node = current_node->left;
         return current_node;
     }
     Node *_maximum(Node *current_node)
     {
-        while (current_node->rightChild != nil)
-            current_node = current_node->rightChild;
+        while (current_node->right != nil)
+            current_node = current_node->right;
         return current_node;
     }
     Node *_search(keytype k)
@@ -88,19 +87,19 @@ public:
         while (current_node != nil && k != current_node->key)
         {
             if (k < current_node->key)
-                current_node = current_node->leftChild;
+                current_node = current_node->left;
             else
-                current_node = current_node->rightChild;
+                current_node = current_node->right;
         }
         return current_node; //returns nil if not found
     }
     Node *_successor(Node *current_node)
     {
         /*returns the NODE successor of the current_node*/
-        if (current_node->rightChild != nil)
-            return _minimum(current_node->rightChild);
+        if (current_node->right != nil)
+            return _minimum(current_node->right);
         Node *parent = current_node->parent;
-        while (parent != nil && current_node == parent->rightChild)
+        while (parent != nil && current_node == parent->right)
         {
             current_node = parent;
             parent = parent->parent;
@@ -110,10 +109,10 @@ public:
     Node *_predecessor(Node *current_node)
     {
         /*returns the NODE predecessor of the current_node*/
-        if (current_node->leftChild != nil)
-            return _maximum(current_node->leftChild);
+        if (current_node->left != nil)
+            return _maximum(current_node->left);
         Node *parent = current_node->parent;
-        while (parent != nil && current_node == parent->leftChild)
+        while (parent != nil && current_node == parent->left)
         {
             current_node = parent;
             parent = parent->parent;
@@ -208,26 +207,26 @@ void RBTree<keytype, valuetype>::insert(keytype k, valuetype v)
             last_node = current_node;
             if (new_node->key < current_node->key)
             {
-                current_node = current_node->leftChild;
+                current_node = current_node->left;
             }
             else
             {
-                current_node = current_node->rightChild;
+                current_node = current_node->right;
             }
         }
         current_node = last_node;        //cleaning up the current node
         new_node->parent = current_node; //setting the parent node of new node
         if (new_node->key < current_node->key)
         {
-            current_node->leftChild = new_node;
+            current_node->left = new_node;
         }
         else
         {
-            current_node->rightChild = new_node;
+            current_node->right = new_node;
         }
     }
-    new_node->leftChild = nil;
-    new_node->rightChild = nil;
+    new_node->left = nil;
+    new_node->right = nil;
     _insertFixup(new_node);
 }
 
@@ -241,9 +240,9 @@ void RBTree<keytype, valuetype>::_insertFixup(Node *new_node)
     Node *uncle = NULL;
     while (new_node->parent->color == RED)
     {
-        if (new_node->parent == new_node->parent->parent->leftChild)
-        {                                                 //checking if parent of new node is left or right child
-            uncle = new_node->parent->parent->rightChild; //brother of new node's parent
+        if (new_node->parent == new_node->parent->parent->left)
+        {                                            //checking if parent of new node is left or right child
+            uncle = new_node->parent->parent->right; //brother of new node's parent
             if (uncle->color == RED)
             { //parent and uncle are both red (CASE 1)
                 new_node->parent->color = BLACK;
@@ -253,7 +252,7 @@ void RBTree<keytype, valuetype>::_insertFixup(Node *new_node)
             }
             else
             {
-                if (new_node == new_node->parent->rightChild)
+                if (new_node == new_node->parent->right)
                 { //uncle is black, parent is red, new_node is to the right(CASE 2)
                     new_node = new_node->parent;
                     _leftRotate(new_node);
@@ -265,7 +264,7 @@ void RBTree<keytype, valuetype>::_insertFixup(Node *new_node)
         }
         else
         {
-            uncle = new_node->parent->parent->leftChild;
+            uncle = new_node->parent->parent->left;
             if (uncle->color == RED)
             {
                 new_node->parent->color = BLACK;
@@ -275,7 +274,7 @@ void RBTree<keytype, valuetype>::_insertFixup(Node *new_node)
             }
             else
             {
-                if (new_node == new_node->parent->leftChild)
+                if (new_node == new_node->parent->left)
                 {
                     new_node = new_node->parent;
                     _rightRotate(new_node);
@@ -301,30 +300,30 @@ void RBTree<keytype, valuetype>::_leftRotate(Node *node)
         b      c    a       b
 
     */
-    Node *y = node->rightChild;
-    node->rightChild = y->leftChild;
-    if (y->leftChild != nil)
+    Node *y = node->right;
+    node->right = y->left;
+    if (y->left != nil)
     {
-        y->leftChild->parent = node;
+        y->left->parent = node;
     }
     y->parent = node->parent;
     if (node->parent == nil)
     {
         root = y;
     }
-    else if (node == node->parent->leftChild)
+    else if (node == node->parent->left)
     {
-        node->parent->leftChild = y;
+        node->parent->left = y;
     }
     else
     {
-        node->parent->rightChild = y;
+        node->parent->right = y;
     }
-    y->leftChild = node;
+    y->left = node;
     node->parent = y;
     //update size after the rotations
     y->size = node->size;
-    node->size = node->leftChild->size + node->rightChild->size + 1;
+    node->size = node->left->size + node->right->size + 1;
 }
 
 template <class keytype, class valuetype>
@@ -339,47 +338,47 @@ void RBTree<keytype, valuetype>::_rightRotate(Node *node)
         b      c    a       b
 
     */
-    Node *x = node->leftChild;
-    node->leftChild = x->rightChild;
-    if (x->rightChild != nil)
+    Node *x = node->left;
+    node->left = x->right;
+    if (x->right != nil)
     {
-        x->rightChild->parent = node;
+        x->right->parent = node;
     }
     x->parent = node->parent;
     if (node->parent == nil)
     {
         root = x;
     }
-    else if (node == node->parent->rightChild)
+    else if (node == node->parent->right)
     {
-        node->parent->rightChild = x;
+        node->parent->right = x;
     }
     else
     {
-        node->parent->leftChild = x;
+        node->parent->left = x;
     }
-    x->rightChild = node;
+    x->right = node;
     node->parent = x;
     //update size after the rotations
     x->size = node->size;
-    node->size = node->rightChild->size + node->leftChild->size + 1;
+    node->size = node->right->size + node->left->size + 1;
 }
 
 template <class keytype, class valuetype>
-void RBTree<keytype, valuetype>::_transplant(Node *root, Node *root_child)
+void RBTree<keytype, valuetype>::_transplant(Node *u, Node *root_child)
 {
     /*replaces the subtree rooted at 'root' with the subtree rooted at 'root_child'
       outputs:
               u's parent is now v's parent
               u's parent has v as a child (which child depends on the situation)
     */
-    if (root->parent == nil) //root is the root node in the tree
+    if (u->parent == nil) //root is the root node in the tree
         root = root_child;
-    else if (root == root->parent->left) //root is a left child
-        root->parent->left = root_child;
+    else if (u == u->parent->left) //root is a left child
+        u->parent->left = root_child;
     else //root is a right child
-        root->parent->right = root_child;
-    root_child->parent = root->parent; //update the parent of 'root_child' to be 'root' parent
+        u->parent->right = root_child;
+    root_child->parent = u->parent; //update the parent of 'root_child' to be 'root' parent
 }
 
 template <class keytype, class valuetype>
@@ -401,56 +400,124 @@ int RBTree<keytype, valuetype>::remove(keytype k)
                 -replace the successor node by its own right child
                 -replace the node to delete by the successor node
     */
-    Node *node_to_delete = _search(k); //obtain a pointer to the node with key k
-    Node *node_to_delete_child = NULL;
-    if (node_to_delete == nil)
+    Node *z = _search(k); //obtain a pointer to the node with key k
+    Node *x = NULL;
+    if (z == nil)
         return 0;
 
-    Node *successor = node_to_delete;
-    bool original_successor_color = successor->color; //keep track of color before any changes
-    if (node_to_delete->leftChild == nil)             //node to delete has no left child
+    Node *y = z;
+    bool original_y_color = y->color; //keep track of color before any changes
+    if (z->left == nil)               //node to delete has no left child
     {
-        node_to_delete_child = node_to_delete->rightChild;
-        _transplant(node_to_delete, node_to_delete_child); //replace node to delete by its right child(could be nil)
+        x = z->right;
+        _transplant(z, x); //replace node to delete by its right child(could be nil)
     }
-    else if (node_to_delete->rightChild == nil) //node to delete has a left child but no right child
+    else if (z->right == nil) //node to delete has a left child but no right child
     {
-        node_to_delete_child = node_to_delete->leftChild;
-        _transplant(node_to_delete, node_to_delete_child);
+        x = z->left;
+        _transplant(z, x);
     }
     else //node to delete has two children
     {
-        successor = _minimum(node_to_delete->rightChild); //find the successor of the node to delete
-        original_successor_color = successor->color;
-        node_to_delete_child = successor->rightChild;
-        if (successor->parent == node_to_delete)
-            node_to_delete_child->parent = successor;
+        y = _minimum(z->right); //find the y of the node to delete
+        original_y_color = y->color;
+        x = y->right;
+        if (y->parent == z)
+            x->parent = y;
         else
         {
-            _transplant(successor, node_to_delete_child);
-            successor->rightChild = node_to_delete->rightChild;
-            successor->rightChild->parent = successor;
+            _transplant(y, x);
+            y->right = z->right;
+            y->right->parent = y;
         }
-        _transplant(node_to_delete, successor);
-        successor->leftChild = node_to_delete->leftChild; //successor has been moved into node to deletes spot
-        successor->leftChild->parent = successor;
-        successor->color = node_to_delete->color;
+        _transplant(z, y);
+        y->left = z->left; //y has been moved into node to deletes spot
+        y->left->parent = y;
+        y->color = z->color;
     }
-    //if (original_successor_color == BLACK)  //some violations might of been introduced
-    //_removeFixup(node_to_delete_child);
+    if (original_y_color == BLACK) //some violations might of been introduced
+        _removeFixup(x);
+    return 1;
 }
 
 template <class keytype, class valuetype>
-void RBTree<keytype, valuetype>::_removeFixup(Node *node_to_delete_child)
+void RBTree<keytype, valuetype>::_removeFixup(Node *x)
 {
     /*Three problems may of come up in removing a node:
         1. If successor had been the root and a red child of successor becomes the new root, 
             we have violated property 2
-        2. If both node to delete's child and node to delete's child's parent are red, 
+        2. If both node to delete's child and y to delete's child's parent are red, 
             then we have violated property 4
         3. Moving successor within the tree causes any path that contained successor to have one
             fewer black node, violating property 5
     */
+    Node *w = NULL;
+    while (x != root && x->color == BLACK)
+    {
+        if (x == x->parent->left)
+        {
+            w = x->parent->right;
+            if (w->color == RED)
+            { //case 1
+                w->color = BLACK;
+                x->parent->color = RED;
+                _leftRotate(x->parent);
+                w = x->parent->right;
+            }
+            if (w->left->color == BLACK && w->right->color == BLACK)
+            { //case 2
+                w->color = RED;
+                x = x->parent;
+            }
+            else
+            {
+                if (w->right->color == BLACK)
+                {
+                    w->left->color = BLACK;
+                    w->color = RED;
+                    _rightRotate(w);
+                    w = x->parent->right;
+                }
+                w->color = x->parent->color;
+                x->parent->color = BLACK;
+                w->right->color = BLACK;
+                _leftRotate(x->parent);
+                x = root;
+            }
+        }
+        else //same as the 'if' with left and right switched
+        {
+            w = x->parent->left;
+            if (w->color == RED)
+            { //case 1
+                w->color = BLACK;
+                x->parent->color = RED;
+                _rightRotate(x->parent);
+                w = x->parent->left;
+            }
+            if (w->right->color == BLACK && w->left->color == BLACK)
+            { //case 2
+                w->color = RED;
+                x = x->parent;
+            }
+            else
+            {
+                if (w->left->color == BLACK)
+                {
+                    w->right->color = BLACK;
+                    w->color = RED;
+                    _leftRotate(w);
+                    w = x->parent->left;
+                }
+                w->color = x->parent->color;
+                x->parent->color = BLACK;
+                w->left->color = BLACK;
+                _rightRotate(x->parent);
+                x = root;
+            }
+        }
+    }
+    x->color = BLACK;
 }
 
 template <class keytype, class valuetype>
@@ -462,15 +529,15 @@ int RBTree<keytype, valuetype>::rank(keytype k)
                 0 if not found
                 1 if smallest item
     */
-    Node *node_to_delete = _search(k);
-    if (node_to_delete == nil)
+    Node *z = _search(k);
+    if (z == nil)
         return 0;
-    int r = node_to_delete->leftChild->size + 1;
-    Node *y = node_to_delete;
+    int r = z->left->size + 1;
+    Node *y = z;
     while (y != root)
     {
-        if (y == y->parent->rightChild)
-            r = r + y->parent->leftChild->size + 1;
+        if (y == y->parent->right)
+            r = r + y->parent->left->size + 1;
         y = y->parent;
     }
     return r;
@@ -485,7 +552,8 @@ int RBTree<keytype, valuetype>::size()
 template <class keytype, class valuetype>
 valuetype *RBTree<keytype, valuetype>::search(keytype k)
 {
-    return &_search(k)->value;
+    valuetype *result = *_search(k)->value;
+    return result;
 }
 
 template <class keytype, class valuetype>
@@ -504,7 +572,7 @@ keytype *RBTree<keytype, valuetype>::successor(keytype k)
 template <class keytype, class valuetype>
 keytype *RBTree<keytype, valuetype>::predecessor(keytype k)
 {
-    return &_successor(_search(k))->key;
+    return &_predecessor(_search(k))->key;
 }
 
 template <class keytype, class valuetype>
@@ -534,8 +602,8 @@ void RBTree<keytype, valuetype>::_preorderWalk(Node *node)
     if (node != nil)
     {
         cout << node->key << " ";
-        _preorderWalk(node->leftChild);
-        _preorderWalk(node->rightChild);
+        _preorderWalk(node->left);
+        _preorderWalk(node->right);
     }
 }
 
@@ -544,9 +612,9 @@ void RBTree<keytype, valuetype>::_inorderWalk(Node *node)
 {
     if (node != nil)
     {
-        _inorderWalk(node->leftChild);
+        _inorderWalk(node->left);
         cout << node->key << " ";
-        _inorderWalk(node->rightChild);
+        _inorderWalk(node->right);
     }
 }
 
@@ -555,64 +623,8 @@ void RBTree<keytype, valuetype>::_postorderWalk(Node *node)
 {
     if (node != nil)
     {
-        _postorderWalk(node->leftChild);
-        _postorderWalk(node->rightChild);
+        _postorderWalk(node->left);
+        _postorderWalk(node->right);
         cout << node->key << " ";
-    }
-}
-
-template <class keytype, class valuetype>
-void RBTree<keytype, valuetype>::displayTree()
-{
-    _displayTree(root);
-}
-template <class keytype, class valuetype>
-void RBTree<keytype, valuetype>::_displayTree(Node *p)
-{
-    if (root == nil)
-    {
-        cout << "\nEmpty Tree.";
-        return;
-    }
-    if (p != nil)
-    {
-        cout << "\n\t NODE: ";
-        cout << "\n Key: " << p->key;
-        cout << "\n Colour: ";
-        if (p->color == false)
-            cout << "Black";
-        else
-            cout << "Red";
-        if (p->parent != nil)
-            cout << "\n Parent: " << p->parent->key;
-        else
-            cout << "\n There is no parent of the node.  ";
-        if (p->size)
-            cout << "\n Size: " << p->size;
-        else
-            cout << "\n There is no size of the node.  ";
-        if (p->rightChild != nil)
-            cout << "\n Right Child: " << p->rightChild->key;
-        else
-            cout << "\n There is no right child of the node.  ";
-        if (p->leftChild != nil)
-            cout << "\n Left Child: " << p->leftChild->key;
-        else
-            cout << "\n There is no left child of the node.  ";
-        cout << endl;
-        if (p->leftChild)
-        {
-            cout << "\n\nLeft:\n";
-            _displayTree(p->leftChild);
-        }
-        /*else
-     cout<<"\nNo Left Child.\n";*/
-        if (p->rightChild)
-        {
-            cout << "\n\nRight:\n";
-            _displayTree(p->rightChild);
-        }
-        /*else
-     cout<<"\nNo Right Child.\n"*/
     }
 }

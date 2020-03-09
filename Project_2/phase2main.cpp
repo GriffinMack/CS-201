@@ -23,7 +23,7 @@ int main()
     //Should output 3
 
     cout << T1.rank("Z") << endl;
-    //Should output 3
+    //Should output 0
 
     cout << T1.select(3) << endl;
     //Should output C
@@ -34,34 +34,34 @@ int main()
     T2.inorder();
     //Should output	A B C D E F G H I K
 
-    // cout << T2.remove("D") << endl;
-    // //Should output 1
+    cout << T2.remove("D") << endl;
+    //Should output 1
 
-    // T2.preorder();
-    // //Should output E B A C H F G I K
+    T2.preorder();
+    //Should output E B A C H F G I K
 
-    // T2.inorder();
-    // //Should output	A B C E F G H I K
+    T2.inorder();
+    //Should output	A B C E F G H I K
 
-    // cout << T2.remove("J") << endl;
-    // //Should output 0
+    cout << T2.remove("J") << endl;
+    //Should output 0
 
-    // cout << T2.rank("G") << endl;
-    // //Should output 6
+    cout << T2.rank("G") << endl;
+    //Should output 6
 
-    // cout << *(T1.successor("C")) << endl;
-    // //Should output D
+    cout << *(T1.successor("C")) << endl;
+    //Should output D
 
-    // cout << *(T1.predecessor("C")) << endl;
-    // //Should output B
+    cout << *(T1.predecessor("C")) << endl;
+    //Should output B
 
     RBTree<int, int> X;
     for (int i = 1; i < 100000; i++)
         X.insert(i, i);
     for (int i = 1; i < 100000; i++)
     {
-        // if (X.rank(i) != i)
-        //     cout << "Rank error" << endl;
+        if (X.rank(i) != i)
+            cout << "Rank error" << endl;
         if (X.select(i) != i)
             cout << "Select error" << endl;
         if (*(X.search(i)) != i)
