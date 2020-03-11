@@ -16,14 +16,8 @@ int main()
     cout << *(T2.search("C")) << endl;
     // Should output 8
 
-    // cout << *(T2.search("Z")) << endl;
-    // // Should output null
-
     cout << T1.rank("C") << endl;
     //Should output 3
-
-    cout << T1.rank("Z") << endl;
-    //Should output 0
 
     cout << T1.select(3) << endl;
     //Should output C
@@ -34,13 +28,8 @@ int main()
     T2.inorder();
     //Should output	A B C D E F G H I K
 
-    //cout << T2.remove("D") << endl;
+    cout << T2.remove("D") << endl;
     //Should output 1
-
-    if (T1 == T2)
-    {
-        cout << "YUP" << endl;
-    }
 
     T2.preorder();
     //Should output E B A C H F G I K
@@ -72,7 +61,6 @@ int main()
         if (*(X.search(i)) != i)
             cout << "Search error" << endl;
     }
-
     //Should be no output and should take seconds, not minutes
     return 0;
 }
