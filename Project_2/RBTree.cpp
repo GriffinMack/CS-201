@@ -57,7 +57,64 @@ public:
     void _removeFixup(Node *);
     void _preorderWalk(Node *node);
     void _inorderWalk(Node *node);
-    void _postorderWalk(Node *node);
+    void _postorderWalk(Node *node, bool print);
+    void _postorderDelete(Node *node);
+    bool _nodeEquality(Node *node1, Node *node2)
+    {
+        //checks if two nodes have identical values
+        if (node1->value != node2->value)
+            return false;
+        if (node1->key != node2->key)
+            return false;
+        if (node1->color != node2->color)
+            return false;
+        if (node1->size != node2->size)
+            return false;
+        return true;
+    }
+    bool _treeEquality(Node *new_tree_root, Node *old_tree_nil, Node *old_tree_root)
+    {
+        //checks equality of every node in the tree
+        if (old_tree_root == old_tree_nil) //there is no root in the old tree
+        {
+            return _nodeEquality(new_tree_root, old_tree_root); //nil == nil?
+        }
+        if (_nodeEquality(new_tree_root, old_tree_root) == false)
+            return false;
+        _treeEquality(new_tree_root->left, old_tree_nil, old_tree_root->left);
+        _treeEquality(new_tree_root->right, old_tree_nil, old_tree_root->right);
+        return true;
+    }
+    Node *_copyNode(Node *node_to_copy)
+    {
+        //returns a deep copy of a node pointer(doesnt copy left,right,or parent)
+        Node *x = new Node();
+        x->value = node_to_copy->value;
+        x->key = node_to_copy->key;
+        x->color = node_to_copy->color;
+        x->size = node_to_copy->size;
+        return x;
+    }
+
+    Node *_copyTree(Node *old_tree_root, Node *old_tree_nil, Node *new_tree_parent)
+    {
+        //given an old tree root, an old tree's nil, and a new tree's parent,
+        //will create a deep copy of the tree
+        if (old_tree_root == old_tree_nil) //there is no root in the old tree
+        {
+            return nil;
+        }
+        Node *new_tree_root = _copyNode(old_tree_root);
+
+        new_tree_root->parent = new_tree_parent;
+        new_tree_root->left = _copyTree(old_tree_root->left, old_tree_nil, new_tree_root);
+        new_tree_root->right = _copyTree(old_tree_root->right, old_tree_nil, new_tree_root);
+        if (new_tree_root->parent == nil)
+        {
+            root = new_tree_root;
+        }
+        return new_tree_root;
+    }
     Node *_select(Node *node, int pos)
     {
         int rank = node->left->size + 1;
@@ -80,17 +137,20 @@ public:
             current_node = current_node->right;
         return current_node;
     }
-    Node *_search(keytype k)
+    Node *_search(keytype k, int size_change = 0)
     {
         /*returns the NODE with the key k*/
         Node *current_node = root;
         while (current_node != nil && k != current_node->key)
         {
+            current_node->size = current_node->size + size_change;
             if (k < current_node->key)
                 current_node = current_node->left;
             else
                 current_node = current_node->right;
         }
+        if (current_node == nil)
+            return nullptr;
         return current_node; //returns nil if not found
     }
     Node *_successor(Node *current_node)
@@ -125,8 +185,13 @@ public:
     RBTree();
     // argument constructor
     RBTree(keytype k[], valuetype V[], int size);
+    //copy constructor
+    RBTree(RBTree &old_tree);
     // destructor
     ~RBTree();
+    //overloaded operators
+    void operator=(const RBTree &old_tree);
+    bool operator==(const RBTree &old_tree);
 
     void insert(keytype k, valuetype v);
     int remove(keytype k);
@@ -167,10 +232,46 @@ RBTree<keytype, valuetype>::RBTree(keytype k[], valuetype V[], int size)
         insert(k[i], V[i]);
 }
 
+// copy constructor
+template <class keytype, class valuetype>
+RBTree<keytype, valuetype>::RBTree(RBTree &old_tree)
+{
+    nil = new Node();
+    nil->color = BLACK;
+    nil->size = 0;
+    current_size = old_tree.current_size;
+    root = nil; //begin with pointing to an empty tree
+    _copyTree(old_tree.root, old_tree.nil, nil);
+}
+
+template <class keytype, class valuetype>
+void RBTree<keytype, valuetype>::operator=(const RBTree &old_tree)
+{
+    if (this == &old_tree) //T = T
+    {
+        return;
+    }
+    current_size = old_tree.current_size;
+    root = nil; //begin with pointing to an empty tree
+    _copyTree(old_tree.root, old_tree.nil, nil);
+}
+
+template <class keytype, class valuetype>
+bool RBTree<keytype, valuetype>::operator==(const RBTree &old_tree)
+{
+    //checks if the address is the same, only works for objt == objt
+    if (this == &old_tree)
+        return true;
+    //check all values related to the class now
+    return _treeEquality(root, old_tree.nil, old_tree.root);
+    return true;
+}
+
 // destructor
 template <class keytype, class valuetype>
 RBTree<keytype, valuetype>::~RBTree()
 {
+    _postorderDelete(root);
 }
 
 template <class keytype, class valuetype>
@@ -400,11 +501,11 @@ int RBTree<keytype, valuetype>::remove(keytype k)
                 -replace the successor node by its own right child
                 -replace the node to delete by the successor node
     */
-    Node *z = _search(k); //obtain a pointer to the node with key k
+    Node *z = _search(k, -1); //obtain a pointer to the node with key k
     Node *x = NULL;
-    if (z == nil)
+    if (z == nullptr)
         return 0;
-
+    current_size--; //the node exists so it will be removed
     Node *y = z;
     bool original_y_color = y->color; //keep track of color before any changes
     if (z->left == nil)               //node to delete has no left child
@@ -530,7 +631,7 @@ int RBTree<keytype, valuetype>::rank(keytype k)
                 1 if smallest item
     */
     Node *z = _search(k);
-    if (z == nil)
+    if (z == nullptr)
         return 0;
     int r = z->left->size + 1;
     Node *y = z;
@@ -552,8 +653,9 @@ int RBTree<keytype, valuetype>::size()
 template <class keytype, class valuetype>
 valuetype *RBTree<keytype, valuetype>::search(keytype k)
 {
-    valuetype *result = *_search(k)->value;
-    return result;
+    if (_search(k) == nullptr)
+        return nullptr;
+    return &_search(k)->value;
 }
 
 template <class keytype, class valuetype>
@@ -566,12 +668,16 @@ keytype RBTree<keytype, valuetype>::select(int pos)
 template <class keytype, class valuetype>
 keytype *RBTree<keytype, valuetype>::successor(keytype k)
 {
+    if (_successor(_search(k)) == nil)
+        return nullptr;
     return &_successor(_search(k))->key;
 }
 
 template <class keytype, class valuetype>
 keytype *RBTree<keytype, valuetype>::predecessor(keytype k)
 {
+    if (_predecessor(_search(k)) == nil)
+        return nullptr;
     return &_predecessor(_search(k))->key;
 }
 
@@ -592,7 +698,7 @@ void RBTree<keytype, valuetype>::inorder()
 template <class keytype, class valuetype>
 void RBTree<keytype, valuetype>::postorder()
 {
-    _postorderWalk(root);
+    _postorderWalk(root, 1);
     cout << endl;
 }
 
@@ -619,12 +725,24 @@ void RBTree<keytype, valuetype>::_inorderWalk(Node *node)
 }
 
 template <class keytype, class valuetype>
-void RBTree<keytype, valuetype>::_postorderWalk(Node *node)
+void RBTree<keytype, valuetype>::_postorderWalk(Node *node, bool print)
 {
     if (node != nil)
     {
-        _postorderWalk(node->left);
-        _postorderWalk(node->right);
-        cout << node->key << " ";
+        _postorderWalk(node->left, print);
+        _postorderWalk(node->right, print);
+        if (print == 1)
+            cout << node->key << " ";
+    }
+}
+
+template <class keytype, class valuetype>
+void RBTree<keytype, valuetype>::_postorderDelete(Node *node)
+{
+    if (node != nil)
+    {
+        _postorderWalk(node->left, 0);
+        _postorderWalk(node->right, 0);
+        delete (node);
     }
 }
