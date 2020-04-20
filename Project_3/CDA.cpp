@@ -412,7 +412,7 @@ void CDA<data_type>::display_array()
     cout << "offset: " << index_offset << " size: " << size << " capacity: " << capacity << " current data array: ";
     for (int i = 0; i < capacity; i++)
     {
-        cout << " " << (*this)[i] << " ";
+        cout << " " << (*this)[i]->key << " ";
     }
     cout << endl;
 }
