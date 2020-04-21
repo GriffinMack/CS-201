@@ -25,30 +25,30 @@ private:
         }
         for (int i = (size - 1) / 2; i >= 0; i--)
         {
-            maxHeapify(i, size - 1);
+            minHeapify(i, size - 1);
         }
     }
 
-    void maxHeapify(int i, int size)
+    void minHeapify(int i, int size)
     {
         int left = (2 * i) + 1;
         int right = (2 * i) + 2;
         int largest = 0;
 
-        if (left <= size && storage[left]->key > storage[i]->key)
+        if (left <= size && storage[left]->key < storage[i]->key)
         {
             largest = left;
         }
         else
             largest = i;
-        if (right <= size && storage[right]->key > storage[largest]->key)
+        if (right <= size && storage[right]->key < storage[largest]->key)
         {
             largest = right;
         }
         if (largest != i)
         {
             exchange(i, largest);
-            maxHeapify(largest, size);
+            minHeapify(largest, size);
         }
     }
 
@@ -60,14 +60,9 @@ private:
         storage[j] = temp;
     }
 
-    void printArray()
+    int parent(int i)
     {
-        //prints the current array's keys
-        for (int i = 0; i < currentSize; i++)
-        {
-            cout << storage[i]->key << " ";
-        }
-        cout << endl;
+        return ((i + 1) / 2) - 1;
     }
 
 public:
@@ -76,13 +71,6 @@ public:
         //data about the node(value and key represent two seperate data entries ex. CWID and Name)
         valuetype value;
         keytype key;
-
-        //constructor for the Node(called when inserting)
-        Node()
-        {
-            value = "0";
-            key = 0;
-        }
     };
 
     CDA<Node *> storage;
@@ -104,6 +92,7 @@ public:
 template <class keytype, class valuetype>
 Heap<keytype, valuetype>::Heap()
 {
+    currentSize = 0;
 }
 
 // argument constructor
@@ -123,24 +112,53 @@ Heap<keytype, valuetype>::~Heap()
 template <class keytype, class valuetype>
 valuetype Heap<keytype, valuetype>::peekValue()
 {
+    //return the minimum key's value without touching the heap
+    return storage[0]->value;
 }
 
 template <class keytype, class valuetype>
 keytype Heap<keytype, valuetype>::peekKey()
 {
+    //return the minimum key without touching the heap
+    return storage[0]->key;
 }
 
 template <class keytype, class valuetype>
 keytype Heap<keytype, valuetype>::extractMin()
 {
+    //return the minimum key and remove the key from the heap
+    Node *min = storage[0];
+    storage[0] = storage[currentSize - 1];
+    currentSize--;
+    minHeapify(0, currentSize);
+    return min->key;
 }
 
 template <class keytype, class valuetype>
 void Heap<keytype, valuetype>::insert(keytype k, valuetype v)
 {
+    //create a node with the key and value pair
+    Node *node = new Node();
+    node->key = k;
+    node->value = v;
+
+    currentSize++;
+    storage.AddEnd(node);
+    int i = currentSize - 1;
+    while (i > 0 && storage[parent(i)]->key > storage[i]->key)
+    {
+        exchange(parent(i), i);
+        i = parent(i);
+    }
 }
 
 template <class keytype, class valuetype>
 void Heap<keytype, valuetype>::printKey()
 {
+    //prints the current array's keys
+    for (int i = 0; i < currentSize; i++)
+    {
+        cout << storage[i]->key << " ";
+    }
+    cout << endl;
 }
