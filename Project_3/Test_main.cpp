@@ -28,26 +28,29 @@ int main()
     // //
     // //B3
     // //C E H I F J K D
-
-    Y.insert("M", 100);
-    Y.insert("O", 101);
-    Y.insert("G", 102);
-    Y.insert("N", 103);
-    Y.insert("L", 104);
-
+    cout << "____________ " << endl;
+    Y = X;
     Y.printKey();
-    // //Should output
-    // //B0
-    // //L
-    // //
-    // //B2
-    // //G M O N
 
-    Y.merge(X);
-    cout << Y.peekKey() << endl;
-    // //Should output B
+    // Y.insert("M", 100);
+    // Y.insert("O", 101);
+    // Y.insert("G", 102);
+    // Y.insert("N", 103);
+    // Y.insert("L", 104);
 
-    Y.printKey();
+    // Y.printKey();
+    // // //Should output
+    // // //B0
+    // // //L
+    // // //
+    // // //B2
+    // // //G M O N
+
+    // Y.merge(X);
+    // cout << Y.peekKey() << endl;
+    // // //Should output B
+
+    // Y.printKey();
     // //Should output
     // //B1
     // //B L

@@ -1,0 +1,35 @@
+B0
+K 
+
+B2
+F I J H 
+
+B3
+A B D E C AB AD AA 
+
+A
+B2
+AA AB AD K 
+
+B3
+B F I J H D E C 
+
+B1
+3 e 
+
+B2
+P a s h 
+
+3
+B1
+3 e 
+
+B4
+AA B F I J H D E C P a s h AB AD K 
+
+peakKey passed 
+peakValue passed 
+extractMin passed 
+peakKey passed 
+peakValue passed 
+extractMin passed 

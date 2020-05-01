@@ -1,3 +1,6 @@
+#ifndef _CDA_
+#define _CDA_
+
 #include <cstdlib>
 
 #define MIN_CAPACITY 1         //array will never go below this capacity
@@ -509,3 +512,5 @@ void CDA<data_type>::insertionsort(int left, int right)
     }
     ordered = true;
 }
+
+#endif
